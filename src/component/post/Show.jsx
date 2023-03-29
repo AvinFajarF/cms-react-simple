@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import Ghost from "./../images/Ghosty.gif";
+import Ghost from "./../../images/Ghosty.gif";
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
 
 const Post = () => {
   const { id } = useParams();
@@ -67,18 +69,18 @@ const Post = () => {
       ) : (
         <>
         {/* post  detail */}
-          <div className="block max-w-sm p-10 m-auto mt-10 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-          >
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-             {post.title}
-            </h5>
-            <span className="text-white inline-block mt-2 font-serif">👁️ {post.views}</span>
-            <p className="font-normal text-gray-700 dark:text-gray-400 mt-3 font-mono">
-            {post.content}
-            </p>
-          </div>
+        <Card className="w-50 m-auto mt-4" border="primary">
+      <Card.Header>Detail Postingan</Card.Header>
+      <Card.Body>
+        <Card.Title>{post.title}</Card.Title>
+        <Card.Text className="text-truncate">
+         {post.content}
+        </Card.Text>
+        <Button variant="primary">Views {post.views}</Button>
+      </Card.Body>
+    </Card>
 
-<h2 className="mt-9 text-center font-semibold font-mono">Commentar</h2>
+<h2 className="mt-4 text-center">Commentar</h2>
 
 {/* end post detail */}
 
@@ -89,19 +91,20 @@ const Post = () => {
 
   return (
     <>
-<div class="flex justify-center pt-4">
-  <div
-    class="block max-w-sm rounded-lg bg-slate-800 p-6 shadow-lg ">
-    <h5
-      class="mb-2 text-xl font-medium leading-tight text-neutral-800 dark:text-neutral-50">
-     {user.name}
-    </h5>
-    <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
-     {comment.content}
-    </p>
-    
-  </div>
-</div>
+<Card className="w-25 mt-3 m-auto" border="black">
+      <Card.Header>Comments</Card.Header>
+      <Card.Body>
+        <blockquote className="blockquote mb-0">
+          <p>
+            {' '}
+            {comment.content}{' '}
+          </p>
+          <footer className="blockquote-footer">
+            Created By <cite title="Source Title">{user.name}</cite>
+          </footer>
+        </blockquote>
+      </Card.Body>
+    </Card>
 </>
   )
 
