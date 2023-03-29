@@ -1,60 +1,96 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import React, { useRef} from "react";
-import { useNavigate } from 'react-router-dom';
-import './../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import "./../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
+
+// toast
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
+  // toast
+  const notify = () => toast("Wow so easy!");
+
   const inputEmail = useRef(null);
   const inputPassword = useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     const email = inputEmail.current.value;
     const password = inputPassword.current.value;
 
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
+    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then( () => {
       // login
-      axios.post("http://127.0.0.1:8000/api/v1/login", {  
-      email: email,
-      password: password
-      }, {
-        withCredentials: true
-      }).then((res) => {
-        let token = res.data.token;
-        Cookies.set("Authorization", token);
+      axios
+        .post(
+          "http://127.0.0.1:8000/api/v1/login",
+          {
+            email: email,
+            password: password,
+          },
+          {
+            withCredentials: true,
+          }
+        )
+        .then((res) => {
+          let token = res.data.token;
+          Cookies.set("Authorization", token);
+          console.log(res.message);
+          if (res.data.status === "success") {
+            localStorage.setItem("j", token);
+            localStorage.setItem("auth_name", res.data.name);
 
-        if(res.data.status === 'success'){
-          localStorage.setItem("Authorization", token)
-          localStorage.setItem("auth_name", res.data.name)
-
-          navigate("/")
-        }
-        
-
-
-      });
+            navigate("/");
+          }
+        });
     });
   };
 
   return (
     <>
-      <form>
-  <div class="mb-3">
-    <label for="exampleInputEmail1" classNamel="form-label">Email address</label>
-    <input type="email" classNamel="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
-    <div id="emailHelp" classNamel="form-text">We'll never share your email with anyone else.</div>
-  </div>
-  <div classNamel="mb-3">
-    <label for="exampleInputPassword1" classNamel="form-label">Password</label>
-    <input type="password" classNamel="form-control" id="exampleInputPassword1" />
-  </div>
-  <div classNamel="mb-3 form-check">
-    <input type="checkbox" classNamel="form-check-input" id="exampleCheck1" />
-    <label classNamel="form-check-label" for="exampleCheck1">Check me out</label>
-  </div>
-  <button type="submit" classNamel="btn btn-primary">Submit</button>
-</form>
+    <ToastContainer />
+      <div className="container" border="primay">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card">
+              <div className="card-header bg-success text-white">Login</div>
+              <div className="card-body">
+                <form>
+                  <div className="form-group mb-2">
+                    <label htmlFor="email">Email :</label>
+                    <input
+                      type="email"
+                      ref={inputEmail}
+                      className="form-control"
+                      id="email"
+                      placeholder="Email"
+                    />
+                  </div>
+                  <div className="form-group mb-2">
+                    <label htmlFor="password">Password:</label>
+                    <input
+                      type="password"
+                      ref={inputPassword}
+                      className="form-control"
+                      id="password"
+                      placeholder="Password"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    className="btn btn-primary"
+                  >
+                    Submit
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

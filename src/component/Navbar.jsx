@@ -5,6 +5,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 function App() {
+
+  const token = localStorage.getItem("Authorization")
     return (
         <>
        
@@ -18,8 +20,11 @@ function App() {
             <Nav.Link href="/post">Post</Nav.Link>
             <Nav.Link href="#link">Create</Nav.Link>
             <NavDropdown title="Authentication" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/login">Login</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+              {token ? 
+              <NavDropdown.Item  href="/logout">Logout</NavDropdown.Item>
+            :  
+              <NavDropdown.Item  href="/login">Login</NavDropdown.Item>
+            }
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
