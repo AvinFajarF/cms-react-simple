@@ -6,50 +6,68 @@ import Ghost from "./../../images/Ghosty.gif";
 // boostrap
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import Form from "react-bootstrap/Form";
-import Modal from "react-bootstrap/Modal";
+
+// Toastfy
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Post = () => {
+  // url path img
+  const imgPath = "http://127.0.0.1:8000/images/";
+
   const { id } = useParams();
   const [post, setPost] = useState({});
   const [loading, setLoading] = React.useState(true);
-  const [comments, setComments] = useState([]);
   const [users, setUsers] = useState([]);
 
-  // modal
-  const [show, setShow] = useState(false);
-
   //  commentar
-  const [coba, setCoba] = useState(null)
-  const token = localStorage.getItem("Authorization")
+  const [coba, setCoba] = useState(null);
+  const token = localStorage.getItem("Authorization");
+  const [comments, setComments] = useState([]);
 
   const handleChange = (event) => {
     setCoba(event.target.value);
-  }
-
-  const modalClose = () => setShow(false)
-
-  const handleClose = async () => {
-    setShow(false);
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
-      axios.post(
-          "http://127.0.0.1:8000/api/v1/comentar",
-          {
-            post_id: id,
-            content: coba,
-          },
-          {
-            headers: {
-              "Authorization": `Bearer ${token}`
-            }
-          }
-        ).then(cobas => {
-          console.log(cobas);
-        })
-       
-    });
   };
-  const handleShow = () => setShow(true);
+
+  const submitCommentar = async () => {
+    try {
+      if (token) {
+        await axios
+          .get("http://localhost:8000/sanctum/csrf-cookie")
+          .then(() => {
+            axios
+              .post(
+                "http://127.0.0.1:8000/api/v1/comentar",
+                {
+                  post_id: id,
+                  content: coba,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              )
+              .then(() => {
+                toast.success("💭 Berhasil memposting commentar!", {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                });
+              });
+          });
+      } else {
+        console.log("Error");
+      }
+    } catch (error) {
+      console.log("Terjadi Error", error.message);
+    }
+  };
   // end commentar logic
 
   useEffect(() => {
@@ -68,6 +86,7 @@ const Post = () => {
       }
     };
 
+    // fetch data commentar
     const getComments = async () => {
       try {
         const { data } = await axios.get(
@@ -79,6 +98,7 @@ const Post = () => {
       }
     };
 
+    // fect data user
     const getUser = async () => {
       try {
         const { data } = await axios.get(
@@ -96,7 +116,6 @@ const Post = () => {
     getComments();
   }, [id]);
 
-  
   return (
     <>
       {loading ? (
@@ -104,48 +123,37 @@ const Post = () => {
       ) : (
         <>
           {/* post  detail */}
-          <Card className="w-50 m-auto mt-4" border="primary">
-            <Card.Header>Detail Postingan</Card.Header>
+
+          <Card style={{ width: "58rem" }} className="m-auto mt-4">
+            <Card.Img variant="top" src={imgPath + `${post.image}`} />
             <Card.Body>
-              <Card.Title>{post.title}</Card.Title>
+              <Card.Title style={{ fontFamily: "Cursive" fontWi }}>{post.title}</Card.Title>
               <Card.Text className="text-truncate">{post.content}</Card.Text>
               <Button variant="primary">Views {post.views}</Button>
             </Card.Body>
           </Card>
 
-          <h2 className="mt-4 text-center">Commentar</h2>
+          <h2 className="mt-4 ms-5 mb-5">Commentar</h2>
 
           {/* end post detail */}
 
           {/* modal commentar */}
-          <Button variant="primary" onClick={handleShow}>
-            Add Commentar
-          </Button>
+          <div className="mb-3 w-25 ms-5">
+            <label for="exampleFormControlTextarea1" className="form-label">
+              content comentar
+            </label>
+            <textarea
+              onChange={handleChange}
+              className="form-control"
+              id="exampleFormControlTextarea1"
+              rows="3"
+            ></textarea>
+            <button className="btn btn-primary mt-3" onClick={submitCommentar}>
+              submit
+            </button>
+          </div>
 
-          <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Commentar</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group
-                  className="mb-3"
-                  controlId="exampleForm.ControlTextarea1"
-                >
-                  <Form.Label>Content Comentar</Form.Label>
-                  <Form.Control as="textarea" rows={3} onChange={handleChange} />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={modalClose}>
-                Close
-              </Button>
-              <Button variant="primary" className={token ? '' : 'd-none'} onClick={handleClose}>
-                Submit
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <ToastContainer />
 
           {/* End Modal Comentar */}
 
@@ -155,7 +163,7 @@ const Post = () => {
 
             return (
               <>
-                <Card className="w-25 mt-3 m-auto" border="black">
+                <Card className="w-25 mt-5 ms-5" border="black">
                   <Card.Header>Comments</Card.Header>
                   <Card.Body>
                     <blockquote className="blockquote mb-0">
