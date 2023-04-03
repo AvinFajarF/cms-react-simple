@@ -18,7 +18,7 @@ function App() {
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
             <Nav.Link href="/post">Post</Nav.Link>
-            <Nav.Link href="#link">Create</Nav.Link>
+            <Nav.Link href="/create">Create</Nav.Link>
             <NavDropdown title="Authentication" id="basic-nav-dropdown">
               {token ? 
               <NavDropdown.Item  href="/logout">Logout</NavDropdown.Item>

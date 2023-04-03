@@ -1,7 +1,6 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 import React, { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 
 // toast
@@ -11,7 +10,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
   // toast
-  const notify = () => toast("Wow so easy!");
 
   const inputEmail = useRef(null);
   const inputPassword = useRef(null);
@@ -36,17 +34,22 @@ function Login() {
         )
         .then((res) => {
           let token = res.data.token;
-          Cookies.set("Authorization", token);
-          console.log(res.message);
+          // Cookies.set("", token);
+          console.log(res.data);
           if (res.data.status === "success") {
-            localStorage.setItem("j", token);
+            localStorage.setItem("Authorization", token);
             localStorage.setItem("auth_name", res.data.name);
-
             navigate("/");
           }
         });
     });
   };
+
+
+
+
+
+
 
   return (
     <>
@@ -77,7 +80,7 @@ function Login() {
                       id="password"
                       placeholder="Password"
                     />
-                  </div>
+                  </div><br />
                   <button
                     type="button"
                     onClick={handleLogin}
@@ -85,6 +88,9 @@ function Login() {
                   >
                     Submit
                   </button>
+                  <Link to="/reset-password">
+      Reset-Password
+    </Link>
                 </form>
               </div>
             </div>

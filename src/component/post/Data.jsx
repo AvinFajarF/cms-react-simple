@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Ghost from "./../../images/Ghosty.gif";
-import Table from 'react-bootstrap/Table';
 //import Bootstrap CSS
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+
+// import css
+import "./css/Data.css";
+import { Link } from "react-router-dom";
 
 function App() {
   const [data, setData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+
+  const imgPath = "http://127.0.0.1:8000/images/";
 
   useEffect(() => {
     const getData = async () => {
@@ -31,36 +37,31 @@ function App() {
       {loading ? (
         <img src={Ghost} alt="" className="m-auto" srcset="" />
       ) : (
-        <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Title</th>
-          <th>Content</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-                      {data.map((item) => (
-                        <tr
-                          key={item.id}
-                        >
-                          <td>
-                            {item.id}
-                          </td>
-                          <td>
-                            {item.title}
-                          </td>
-                          <td>
-                            {item.content}
-                          </td>
-                          <td>
-                          <a href={`/posts/${item.id}`}>Show</a>
-                          </td>
-                        </tr>
-                      ))}
-      </tbody>
-    </Table>
+        <>
+          <h1 className="blog-title">Writing from our team</h1>
+          <p className="descripsi">develop react js and laravel api</p>
+
+          {/* card */}
+
+          <Container>
+            <Row xs={1} md={2} lg={3}>
+              {data.map((post) => (
+                <Col key={post.id}>
+                  <Card style={{ width: "18rem" }}>
+                    <Card.Img variant="top" src={imgPath + `${post.image}`} />
+                    <Card.Body>
+                      <Card.Title>{post.title}</Card.Title>
+                      <Card.Text>
+                       {post.content}
+                      </Card.Text>
+                     <Link to={`/posts/${post.id}`}>Detail</Link>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </>
       )}
     </>
   );

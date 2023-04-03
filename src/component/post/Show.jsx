@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams } from "react-router-dom";
 import Ghost from "./../../images/Ghosty.gif";
 
 // boostrap
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
+import Modal from "react-bootstrap/Modal";
 
 // Toastfy
 import { ToastContainer, toast } from "react-toastify";
@@ -20,6 +21,12 @@ const Post = () => {
   const [loading, setLoading] = React.useState(true);
   const [users, setUsers] = useState([]);
 
+  const [content, setContent] = useState();
+  const [title, setTitle] = useState();
+
+  // navigate
+  const navigate = useNavigate()
+
   //  commentar
   const [coba, setCoba] = useState(null);
   const token = localStorage.getItem("Authorization");
@@ -31,6 +38,7 @@ const Post = () => {
 
   const submitCommentar = async () => {
     try {
+      // pengecekan apakah si user sudah ada token
       if (token) {
         await axios
           .get("http://localhost:8000/sanctum/csrf-cookie")
@@ -60,9 +68,20 @@ const Post = () => {
                   theme: "light",
                 });
               });
+            setCoba("");
           });
       } else {
-        console.log("Error");
+        // jika tidak ada munculkan pesan flash massage
+        toast.error("Error memposting commentar! harus login dahulu", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     } catch (error) {
       console.log("Terjadi Error", error.message);
@@ -73,10 +92,16 @@ const Post = () => {
   useEffect(() => {
     const getPost = async () => {
       try {
+        // mengambil data post
         const { data } = await axios.get(
           `http://127.0.0.1:8000/api/v1/post/show/${id}`
         );
 
+        // set data untuk nilai update
+        setTitle(data.data.title);
+        setContent(data.data.content);
+
+        // memberikan waktu untuk loading
         setTimeout(() => {
           setLoading(false);
         }, 1000);
@@ -86,7 +111,7 @@ const Post = () => {
       }
     };
 
-    // fetch data commentar
+    // fetch data detail
     const getComments = async () => {
       try {
         const { data } = await axios.get(
@@ -116,6 +141,90 @@ const Post = () => {
     getComments();
   }, [id]);
 
+  // modal
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  // update post
+  const Title = (event) => {
+    setTitle(event.target.value);
+  };
+
+  const Content = (event) => {
+    setContent(event.target.value);
+  };
+
+  const handleUpdate = async () => {
+    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
+      axios
+        .put(
+          `http://localhost:8000/api/v1/post/${id}`,
+          {
+            title: title,
+            content: content,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then(() => {
+          toast.success("Berhasil mengupdate post!", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        })
+        .catch(() => {
+          toast.error("Error mengupdate post!", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        });
+    });
+  };
+
+  // untuk delete
+  const handeleDeletePost = async () => {
+    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
+      axios
+        .delete(`http://localhost:8000/api/v1/post/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(() => {
+          toast.success("Berhasil delete post!", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          setTimeout(() => {
+            navigate('/post')
+          },1000)
+        });
+    });
+  };
+
   return (
     <>
       {loading ? (
@@ -127,17 +236,69 @@ const Post = () => {
           <Card style={{ width: "58rem" }} className="m-auto mt-4">
             <Card.Img variant="top" src={imgPath + `${post.image}`} />
             <Card.Body>
-              <Card.Title style={{ fontFamily: "Cursive" fontWi }}>{post.title}</Card.Title>
+              <Card.Title>{post.title}</Card.Title>
               <Card.Text className="text-truncate">{post.content}</Card.Text>
               <Button variant="primary">Views {post.views}</Button>
+              <Button className="ms-5" variant="primary" onClick={handleShow}>
+                Update Post
+              </Button>
+              <Button
+                className="ms-5"
+                variant="primary"
+                onClick={handeleDeletePost}
+              >
+                Delete Post
+              </Button>
             </Card.Body>
           </Card>
+
+          {/* Modal update post */}
+
+          <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Modal heading</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {/* title */}
+              <label htmlFor="title">Title :</label>
+              <input
+                type="text"
+                value={title}
+                onChange={Title}
+                className="form-control"
+                id="title"
+                placeholder="Title"
+              />
+              {/* content */}
+              <label for="content" class="form-label">
+                Content :
+              </label>
+              <textarea
+                value={content}
+                onChange={Content}
+                placeholder="Content"
+                class="form-control"
+                id="content"
+                rows="3"
+              ></textarea>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={handleUpdate}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* End Modal update post */}
 
           <h2 className="mt-4 ms-5 mb-5">Commentar</h2>
 
           {/* end post detail */}
 
-          {/* modal commentar */}
+          {/*  commentar */}
           <div className="mb-3 w-25 ms-5">
             <label for="exampleFormControlTextarea1" className="form-label">
               content comentar
@@ -155,7 +316,7 @@ const Post = () => {
 
           <ToastContainer />
 
-          {/* End Modal Comentar */}
+          {/* End  Comentar */}
 
           {/* commentar */}
           {comments.map((comment) => {
