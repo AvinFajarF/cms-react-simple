@@ -19,6 +19,7 @@ function App() {
             <Nav.Link href="/">Home</Nav.Link>
             <Nav.Link href="/post">Post</Nav.Link>
             <Nav.Link href="/create">Create</Nav.Link>
+            <Nav.Link href="/profile">Profile</Nav.Link>
             <NavDropdown title="Authentication" id="basic-nav-dropdown">
               {token ? 
               <NavDropdown.Item  href="/logout">Logout</NavDropdown.Item>
