@@ -1,4 +1,4 @@
-import Data from "./component/post/Data";
+import Index from "./component/post/Index";
 import Navbar from "./component/Navbar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PostDetail from "./component/post/Show";
@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import ResetPassword from "./pages/auth/ResetPassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./component/profile/Profile";
+import Data from "./component/post/Data";
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/post" element={<Data />} />
+          <Route path="/posts/data" element={<Data />} />
+          <Route path="/posts" element={<Index />} />
           <Route path="/create" element={<Create />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route path="/login" element={<Login/>} />

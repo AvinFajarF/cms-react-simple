@@ -1,70 +1,252 @@
-import React, { useEffect, useState } from "react";
+//import hook useState dan useEffect from react
+import { useState, useEffect } from "react";
+
+//import component Bootstrap React
+import {
+  Card,
+  Container,
+  Row,
+  Col,
+  Button,
+  Table,
+  Modal,
+} from "react-bootstrap";
+
+//import axios
 import axios from "axios";
-import Ghost from "./../../images/Ghosty.gif";
-//import Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
 
-// import css
-import "./css/Data.css";
-import { Link } from "react-router-dom";
+// Toastfy
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router";
 
-function App() {
-  const [data, setData] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+function Data() {
+  const navigate = useNavigate();
 
-  const imgPath = "http://127.0.0.1:8000/images/";
+  // token
+  const token = localStorage.getItem("Authorization");
 
+  //define state
+  const [posts, setPosts] = useState([]);
+
+  //useEffect hook
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/v1/post");
-        setData(response.data.data.data);
+    //pengecekan apakah user memiliki hak akses ke component ini
+    axios.get("http://localhost:8000/sanctum/csrf-cookie").then(async () => {
+      await axios
+        .get("http://localhost:8000/api/v1/user/show", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          const { name, alamat, role, jenis_kelamin } = res.data.data;
 
-        setTimeout(() => {
-          setLoading(false);
-        }, 2000);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+          if (role != "superadmin") {
+            navigate("/posts");
+          }
+        });
+    });
 
-    getData();
+    //panggil method "fetchData"
+    fectData();
   }, []);
 
+  //function "fetchData"
+  const fectData = async () => {
+    //fetching
+    const response = await axios.get("http://localhost:8000/api/v1/post");
+
+    //get response data
+    const data = await response.data.data.data;
+
+    //assign response data to state "posts"
+    setPosts(data);
+  };
+
+  // untuk delete
+  const handeleDeletePost = async (id) => {
+    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
+      axios
+        .delete(`http://localhost:8000/api/v1/post/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(() => {
+          toast.success("Berhasil delete post!", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        });
+    });
+  };
+
+  //modal create
+  const [showCreate, setShowCreate] = useState(false);
+
+  const handleCloseCreate = () => setShowCreate(false);
+  const handleShowCreate = () => setShowCreate(true);
+
+  // logic create
+
+  const [titleCreate, setTitleCreate] = useState();
+  const [contentCreate, setContentCreate] = useState();
+
+  const TitleCreate = (event) => {
+    setTitleCreate(event.target.value);
+  };
+
+  const ContentCreate = (event) => {
+    setContentCreate(event.target.value);
+  };
+
+  const submitCreatePost = async () => {
+    if (!token) {
+      toast.error("Error pastikan anda login dahulu!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } else {
+      await axios
+        .get("http://localhost:8000/sanctum/csrf-cookie")
+        .then(async () => {
+          await axios
+            .post(
+              "http://localhost:8000/api/v1/post",
+              {
+                title: titleCreate,
+                content: contentCreate,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then(() => {
+              toast.success("Berhasil membuat Post !", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+              });
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            });
+        });
+    }
+  };
+
   return (
-    <>
-      {loading ? (
-        <img src={Ghost} alt="" className="m-auto" srcset="" />
-      ) : (
-        <>
-          <h1 className="blog-title">Writing from our team</h1>
-          <p className="descripsi">develop react js and laravel api</p>
+    <Container className="mt-3">
+      <ToastContainer />
 
-          {/* card */}
+      <Row>
+        <Col md="{12}">
+          <Card className="border-0 rounded shadow-sm">
+            <Card.Body>
+              <Button
+                variant="success"
+                className="mb-3"
+                onClick={handleShowCreate}
+              >
+                Create post
+              </Button>
+              <Table striped bordered hover className="mb-1">
+                <thead>
+                  <tr>
+                    <th>NO.</th>
+                    <th>TITLE</th>
+                    <th>CONTENT</th>
+                    <th>VIEWS</th>
+                    <th>AKSI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {posts.map((post, index) => (
+                    <tr key={post.id}>
+                      <td>{index + 1}</td>
+                      <td>{post.title}</td>
+                      <td>{post.content}</td>
+                      <td>{post.views}</td>
+                      <td className="text-center">
+                        <Button
+                          variant="danger"
+                          className="me-3 btn-sm"
+                          onClick={() => handeleDeletePost(post.id)}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-          <Container>
-            <Row xs={1} md={2} lg={3}>
-              {data.map((post) => (
-                <Col key={post.id}>
-                  <Card style={{ width: "18rem" }}>
-                    <Card.Img variant="top" src={imgPath + `${post.image}`} />
-                    <Card.Body>
-                      <Card.Title>{post.title}</Card.Title>
-                      <Card.Text>
-                       {post.content}
-                      </Card.Text>
-                     <Link to={`/posts/${post.id}`}>Detail</Link>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </Container>
-        </>
-      )}
-    </>
+      <Modal show={showCreate} onHide={handleCloseCreate}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modal heading</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* title */}
+          <label htmlFor="title">Title :</label>
+          <input
+            type="text"
+            value={titleCreate}
+            onChange={TitleCreate}
+            className="form-control"
+            id="title"
+            placeholder="Title"
+          />
+          {/* content */}
+          <label for="content" class="form-label">
+            Content :
+          </label>
+          <textarea
+            value={contentCreate}
+            onChange={ContentCreate}
+            placeholder="Content"
+            class="form-control"
+            id="content"
+            rows="3"
+          ></textarea>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseCreate}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={submitCreatePost}>
+            Create
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
   );
 }
 
-export default App;
+export default Data;

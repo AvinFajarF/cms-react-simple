@@ -92,6 +92,7 @@ const Post = () => {
   useEffect(() => {
     const getPost = async () => {
       try {
+        console.log('asda');
         // mengambil data post
         const { data } = await axios.get(
           `http://127.0.0.1:8000/api/v1/post/show/${id}`
