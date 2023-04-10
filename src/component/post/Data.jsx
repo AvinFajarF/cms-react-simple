@@ -10,6 +10,7 @@ import {
   Button,
   Table,
   Modal,
+  Form,
 } from "react-bootstrap";
 
 //import axios
@@ -22,6 +23,14 @@ import { useNavigate } from "react-router";
 
 function Data() {
   const navigate = useNavigate();
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  // state
+  const [tag, setTag] = useState([]);
 
   // token
   const token = localStorage.getItem("Authorization");
@@ -42,9 +51,9 @@ function Data() {
         .then((res) => {
           const { name, alamat, role, jenis_kelamin } = res.data.data;
 
-          if (role != "superadmin") {
-            navigate("/posts");
-          }
+          // if (role != "superadmin") {
+          //   navigate("/posts");
+          // }
         });
     });
 
@@ -56,6 +65,14 @@ function Data() {
   const fectData = async () => {
     //fetching
     const response = await axios.get("http://localhost:8000/api/v1/post");
+    const tag = await axios.get("http://localhost:8000/api/v1/tag", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // assign data to tag
+    setTag(tag.data.data);
 
     //get response data
     const data = await response.data.data.data;
@@ -101,6 +118,12 @@ function Data() {
 
   const [titleCreate, setTitleCreate] = useState();
   const [contentCreate, setContentCreate] = useState();
+  const [tagCreate, setTagCreate] = useState();
+
+  // tag
+  const handleTag = (e) => {
+    setTagCreate(e.target.value);
+  };
 
   const TitleCreate = (event) => {
     setTitleCreate(event.target.value);
@@ -139,7 +162,8 @@ function Data() {
                 },
               }
             )
-            .then(() => {
+            .then((res) => {
+              console.log(res);
               toast.success("Berhasil membuat Post !", {
                 position: "top-right",
                 autoClose: 5000,
@@ -158,94 +182,113 @@ function Data() {
     }
   };
 
+  const handleAddTag = (id) => {
+    axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
+      axios
+        .post(
+          "http://localhost:8000/api/v1/post/addTag",
+          {
+            post_id: id,
+            tag_id: tagCreate,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        });
+    });
+  };
+
   return (
-    <Container className="mt-3">
-      <ToastContainer />
-
-      <Row>
-        <Col md="{12}">
-          <Card className="border-0 rounded shadow-sm">
-            <Card.Body>
-              <Button
-                variant="success"
-                className="mb-3"
-                onClick={handleShowCreate}
+    <>
+      <div class="container-fluid">
+        <div class="row flex-nowrap">
+          <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+              <a
+                href="/"
+                class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none"
               >
-                Create post
-              </Button>
-              <Table striped bordered hover className="mb-1">
-                <thead>
-                  <tr>
-                    <th>NO.</th>
-                    <th>TITLE</th>
-                    <th>CONTENT</th>
-                    <th>VIEWS</th>
-                    <th>AKSI</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {posts.map((post, index) => (
-                    <tr key={post.id}>
-                      <td>{index + 1}</td>
-                      <td>{post.title}</td>
-                      <td>{post.content}</td>
-                      <td>{post.views}</td>
-                      <td className="text-center">
+                <span class="fs-5 d-none d-sm-inline">Menu</span>
+              </a>
+              <ul
+                class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+                id="menu"
+              >
+                <li class="nav-item">
+                  <a href="#" class="nav-link align-middle px-0">
+                  <i class="bi bi-stickies"></i>{ " " }
+                    <span class="ms-1 d-none d-sm-inline">Home</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col py-3">
+            <div className="col py-3">
+              <Container className="mt-3">
+                <ToastContainer />
+                <Row>
+                  <Col md="{12}">
+                    <Card className="border-0 rounded shadow-sm">
+                      <Card.Body>
                         <Button
-                          variant="danger"
-                          className="me-3 btn-sm"
-                          onClick={() => handeleDeletePost(post.id)}
+                          variant="success"
+                          className="mb-3"
+                          onClick={handleShowCreate}
                         >
-                          Delete
+                          Create post
                         </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                        <Table striped bordered hover className="mb-1">
+                          <thead>
+                            <tr>
+                              <th>NO.</th>
+                              <th>TITLE</th>
+                              <th>CONTENT</th>
+                              <th>VIEWS</th>
+                              <th>AKSI</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {posts.map((post, index) => (
+                              <tr key={post.id}>
+                                <td>{index + 1}</td>
+                                <td>{post.title}</td>
+                                <td>{post.content}</td>
+                                <td>{post.views}</td>
+                                <td className="text-center">
+                                  <button
+                                    onClick={() => handeleDeletePost(post.id)}
+                                    className="btn btn-outline-danger btn-sm"
+                                  >
+                                    Delete
+                                  </button>
 
-      <Modal show={showCreate} onHide={handleCloseCreate}>
-        <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/* title */}
-          <label htmlFor="title">Title :</label>
-          <input
-            type="text"
-            value={titleCreate}
-            onChange={TitleCreate}
-            className="form-control"
-            id="title"
-            placeholder="Title"
-          />
-          {/* content */}
-          <label for="content" class="form-label">
-            Content :
-          </label>
-          <textarea
-            value={contentCreate}
-            onChange={ContentCreate}
-            placeholder="Content"
-            class="form-control"
-            id="content"
-            rows="3"
-          ></textarea>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseCreate}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={submitCreatePost}>
-            Create
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+                                  <a
+                                    href={`/posts/data/${post.id}/edit`}
+                                    className="btn btn-outline-primary btn-sm ms-2"
+                                  >
+                                    Edit
+                                  </a>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
+              </Container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 
@@ -11,9 +11,19 @@ import "react-toastify/dist/ReactToastify.css";
 function Login() {
   // toast
 
+  const token = localStorage.getItem("Authorization")
+
   const inputEmail = useRef(null);
   const inputPassword = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+
+    if(token) {
+     navigate('/')
+    }
+
+  },[])
 
   const handleLogin = async () => {
     const email = inputEmail.current.value;
@@ -38,7 +48,6 @@ function Login() {
           console.log(res.data);
           if (res.data.status === "success") {
             localStorage.setItem("Authorization", token);
-            localStorage.setItem("auth_name", res.data.name);
             navigate("/");
           }
         });
@@ -88,7 +97,7 @@ function Login() {
                   >
                     Submit
                   </button>
-                  <Link to="/reset-password">
+                  <Link className="ms-4" to="/reset-password">
       Reset-Password
     </Link>
                 </form>

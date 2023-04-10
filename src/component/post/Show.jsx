@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Ghost from "./../../images/Ghosty.gif";
 
 // boostrap
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import Modal from "react-bootstrap/Modal";
 
 // Toastfy
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Post = () => {
-  // url path img
-  const imgPath = "http://127.0.0.1:8000/images/";
-
   const { id } = useParams();
   const [post, setPost] = useState({});
   const [loading, setLoading] = React.useState(true);
@@ -24,8 +19,8 @@ const Post = () => {
   const [content, setContent] = useState();
   const [title, setTitle] = useState();
 
-  // navigate
-  const navigate = useNavigate()
+  const [tag, setTag] = useState([]);
+  const [tagAll, setTagAll] = useState([]);
 
   //  commentar
   const [coba, setCoba] = useState(null);
@@ -92,7 +87,6 @@ const Post = () => {
   useEffect(() => {
     const getPost = async () => {
       try {
-        console.log('asda');
         // mengambil data post
         const { data } = await axios.get(
           `http://127.0.0.1:8000/api/v1/post/show/${id}`
@@ -136,95 +130,29 @@ const Post = () => {
       }
     };
 
+    const getTag = async () => {
+      await axios
+        .get("http://localhost:8000/sanctum/csrf-cookie")
+        .then(async () => {
+          await axios
+            .get(`http://localhost:8000/api/v1/tag/find/${id}`)
+            .then((res) => {
+              setTagAll(res.data.data);
+            });
+
+          await axios.get("http://localhost:8000/api/v1/tag").then((res) => {
+            setTag(res.data.data);
+          });
+        });
+    };
+
+    getTag();
+
     getUser();
 
     getPost();
     getComments();
-  }, [id]);
-
-  // modal
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  // update post
-  const Title = (event) => {
-    setTitle(event.target.value);
-  };
-
-  const Content = (event) => {
-    setContent(event.target.value);
-  };
-
-  const handleUpdate = async () => {
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
-      axios
-        .put(
-          `http://localhost:8000/api/v1/post/${id}`,
-          {
-            title: title,
-            content: content,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then(() => {
-          toast.success("Berhasil mengupdate post!", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-        })
-        .catch(() => {
-          toast.error("Error mengupdate post!", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-        });
-    });
-  };
-
-  // untuk delete
-  const handeleDeletePost = async () => {
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie").then(() => {
-      axios
-        .delete(`http://localhost:8000/api/v1/post/delete/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(() => {
-          toast.success("Berhasil delete post!", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          setTimeout(() => {
-            navigate('/post')
-          },1000)
-        });
-    });
-  };
+  }, []);
 
   return (
     <>
@@ -234,66 +162,25 @@ const Post = () => {
         <>
           {/* post  detail */}
 
-          <Card style={{ width: "58rem" }} className="m-auto mt-4">
-            <Card.Img variant="top" src={imgPath + `${post.image}`} />
-            <Card.Body>
-              <Card.Title>{post.title}</Card.Title>
-              <Card.Text className="text-truncate">{post.content}</Card.Text>
-              <Button variant="primary">Views {post.views}</Button>
-              <Button className="ms-5" variant="primary" onClick={handleShow}>
-                Update Post
-              </Button>
-              <Button
-                className="ms-5"
-                variant="primary"
-                onClick={handeleDeletePost}
-              >
-                Delete Post
-              </Button>
-            </Card.Body>
-          </Card>
+          <div class="card mb-3 w-75 m-auto mt-5">
+            <img
+              src="https://images.unsplash.com/photo-1519337265831-281ec6cc8514?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title fw-bold">{post.title}</h5>
+              <p class="card-text mt-2">{post.content}</p>
+              <p class="card-text">
+                <small class="text-muted">{post.created_at}</small>
+                {tagAll.map((item) => {
+                  const tags = tag.find((items) => item.tag_id === items.id);
 
-          {/* Modal update post */}
-
-          <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Modal heading</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {/* title */}
-              <label htmlFor="title">Title :</label>
-              <input
-                type="text"
-                value={title}
-                onChange={Title}
-                className="form-control"
-                id="title"
-                placeholder="Title"
-              />
-              {/* content */}
-              <label for="content" class="form-label">
-                Content :
-              </label>
-              <textarea
-                value={content}
-                onChange={Content}
-                placeholder="Content"
-                class="form-control"
-                id="content"
-                rows="3"
-              ></textarea>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={handleUpdate}>
-                Save Changes
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
-          {/* End Modal update post */}
+                  return <a href={`/posts/tags/${tags.id}`} class="text-muted ms-3 text-decoration-none">#{tags.name}</a>;
+                })}
+              </p>
+            </div>
+          </div>
 
           <h2 className="mt-4 ms-5 mb-5">Commentar</h2>
 
