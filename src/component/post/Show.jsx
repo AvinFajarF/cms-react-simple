@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import {useParams } from "react-router-dom";
 import Ghost from "./../../images/Ghosty.gif";
 
 // boostrap
@@ -9,6 +9,7 @@ import Card from "react-bootstrap/Card";
 // Toastfy
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Button, Modal } from "react-bootstrap";
 
 const Post = () => {
   const { id } = useParams();
@@ -23,9 +24,16 @@ const Post = () => {
   const [tagAll, setTagAll] = useState([]);
 
   //  commentar
-  const [coba, setCoba] = useState(null);
+  const [coba, setCoba] = useState("");
   const token = localStorage.getItem("Authorization");
   const [comments, setComments] = useState([]);
+
+  // comment reply
+  const [showReply, setShowReply] = useState(false);
+
+  const handleCloseReply = () => setShowReply(false);
+  const handleShowReply = () => setShowReply(true);
+  const [perentId, setPerentId] = useState();
 
   const handleChange = (event) => {
     setCoba(event.target.value);
@@ -82,6 +90,59 @@ const Post = () => {
       console.log("Terjadi Error", error.message);
     }
   };
+
+  const submitCommentarReply = async () => {
+    try {
+      // pengecekan apakah si user sudah ada token
+      if (token) {
+        await axios
+          .get("http://localhost:8000/sanctum/csrf-cookie")
+          .then(() => {
+            axios
+              .post(
+                "http://127.0.0.1:8000/api/v1/comentar",
+                {
+                  post_id: id,
+                  content: coba,
+                  parent_id: perentId,
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              )
+              .then(() => {
+                toast.success("💭 Berhasil reply commentar!", {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                });
+              });
+            setCoba("");
+          });
+      } else {
+        // jika tidak ada munculkan pesan flash massage
+        toast.error("Error memposting commentar! harus login dahulu", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    } catch (error) {
+      console.log("Terjadi Error", error.message);
+    }
+  };
   // end commentar logic
 
   useEffect(() => {
@@ -109,10 +170,23 @@ const Post = () => {
     // fetch data detail
     const getComments = async () => {
       try {
-        const { data } = await axios.get(
-          `http://127.0.0.1:8000/api/v1/post/show/${id}`
-        );
-        setComments(data.data.comments);
+        // const { data } = await axios.get(
+        //   `http://127.0.0.1:8000/api/v1/comentar`,{
+        //     headers: {
+        //       "Authorization": `Bearer ${token}`
+        //     }
+        //   }
+        // );
+        // // setComments(data.data.comments);
+        axios
+          .get("http://localhost:8000/api/v1/comentar", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            setComments(res.data.data);
+          });
       } catch (error) {
         console.log(error);
       }
@@ -176,7 +250,14 @@ const Post = () => {
                 {tagAll.map((item) => {
                   const tags = tag.find((items) => item.tag_id === items.id);
 
-                  return <a href={`/posts/tags/${tags.id}`} class="text-muted ms-3 text-decoration-none">#{tags.name}</a>;
+                  return (
+                    <a
+                      href={`/posts/tags/${tags.id}`}
+                      class="text-muted ms-3 text-decoration-none"
+                    >
+                      #{tags.name}
+                    </a>
+                  );
                 })}
               </p>
             </div>
@@ -207,29 +288,97 @@ const Post = () => {
           {/* End  Comentar */}
 
           {/* commentar */}
-          {comments.map((comment) => {
-            const user = users.find((user) => user.id === comment.user_id);
-
-            return (
-              <>
+          {comments
+            .filter((comment) => !comment.parent_id)
+            .map((comment) => (
+              <div key={comment.id}>
                 <Card className="w-25 mt-5 ms-5" border="black">
                   <Card.Header>Comments</Card.Header>
                   <Card.Body>
                     <blockquote className="blockquote mb-0">
-                      <p> {comment.content} </p>
+                      <p>{comment.content}</p>
                       <footer className="blockquote-footer">
-                        Created By <cite title="Source Title">{user.name}</cite>
+                        Created By{" "}
+                        <cite title="Source Title">
+                          {
+                            users.find((user) => user.id === comment.user_id)
+                              ?.name
+                          }
+                        </cite>
                       </footer>
+                      <button
+                        onClick={() => {
+                          handleShowReply();
+                          setPerentId(comment.id);
+                        }}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        <i className="bi bi-reply"></i>
+                      </button>
                     </blockquote>
                   </Card.Body>
                 </Card>
-              </>
-            );
-          })}
+                {comments
+                  .filter((c) => c.parent_id === comment.id)
+                  .map((reply) => (
+                    <Card
+                      key={reply.id}
+                      className="w-25 mt-5 "
+                      style={{ marginLeft: "150px" }}
+                      border="black"
+                    >
+                      <Card.Header>Reply Comments</Card.Header>
+                      <Card.Body>
+                        <blockquote className="blockquote mb-0">
+                          <p>{reply.content}</p>
+                          <footer className="blockquote-footer">
+                            Created By{" "}
+                            <cite title="Source Title">
+                              {
+                                users.find((user) => user.id === reply.user_id)
+                                  ?.name
+                              }
+                            </cite>
+                          </footer>
+                          {/* <button onClick={() => { handleShowReply(); setPerentId(reply.id); }} className="btn btn-outline-primary btn-sm"><i className="bi bi-reply"></i></button> */}
+                        </blockquote>
+                      </Card.Body>
+                    </Card>
+                  ))}
+              </div>
+            ))}
 
           {/* end commentar */}
         </>
       )}
+
+      <Modal show={showReply} onHide={handleCloseReply}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modal heading</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label htmlFor="content" className="form-label">
+              Content:{" "}
+            </label>
+            <textarea
+              onChange={handleChange}
+              className="form-control"
+              placeholder="isi comment anda"
+              id="content"
+              rows="3"
+            ></textarea>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseReply}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={submitCommentarReply}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

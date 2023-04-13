@@ -52,7 +52,7 @@ function Tags() {
                       src="https://images.unsplash.com/photo-1519337265831-281ec6cc8514?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                       class="card-img-top"
                       height="250px"
-                      alt="..."
+                      alt={dataPost.title}
                     />
                     <div class="card-body">
                       <h5 class="card-title fw-bold">{dataPost.title}</h5>

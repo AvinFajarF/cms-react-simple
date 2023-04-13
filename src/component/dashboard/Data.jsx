@@ -20,6 +20,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 
 function Data() {
   const navigate = useNavigate();
@@ -205,31 +206,6 @@ function Data() {
 
   return (
     <>
-      <div class="container-fluid">
-        <div class="row flex-nowrap">
-          <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-              <a
-                href="/"
-                class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none"
-              >
-                <span class="fs-5 d-none d-sm-inline">Menu</span>
-              </a>
-              <ul
-                class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
-                id="menu"
-              >
-                <li class="nav-item">
-                  <a href="#" class="nav-link align-middle px-0">
-                  <i class="bi bi-stickies"></i>{ " " }
-                    <span class="ms-1 d-none d-sm-inline">Home</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="col py-3">
-            <div className="col py-3">
               <Container className="mt-3">
                 <ToastContainer />
                 <Row>
@@ -237,12 +213,20 @@ function Data() {
                     <Card className="border-0 rounded shadow-sm">
                       <Card.Body>
                         <Button
-                          variant="success"
-                          className="mb-3"
-                          onClick={handleShowCreate}
+                          className="mb-3 btn-sm"
+                          variant="primary"
+                          onClick={handleShow}
                         >
-                          Create post
+                          Create Post
                         </Button>
+
+                        <Link to={'/tags'}
+                          className="btn btn-primary mb-3 btn-sm ms-2"
+                          variant="primary"
+                        >
+                          Create tag
+                        </Link>
+                       
                         <Table striped bordered hover className="mb-1">
                           <thead>
                             <tr>
@@ -284,10 +268,46 @@ function Data() {
                   </Col>
                 </Row>
               </Container>
-            </div>
+            
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modal heading</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              Title:{" "}
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              onChange={TitleCreate}
+            />
           </div>
-        </div>
-      </div>
+
+          <div class="mb-3">
+            <label for="content" class="form-label">
+              Content:{" "}
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="content"
+              onChange={ContentCreate}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={submitCreatePost}>
+            Create
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

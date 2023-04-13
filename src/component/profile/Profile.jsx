@@ -37,7 +37,7 @@ function Profile() {
           setData(res.data.data);
         });
     });
-  }, [token]);
+  }, []);
 
   // onchange data user
 
@@ -138,16 +138,20 @@ function Profile() {
               </div>
 
               <div class="text-center mt-3">
-                <h5 class="mt-2 mb-0">{data.name}</h5>
-                <span>{data.email}</span>
+                {data && (
+                  <>
+                    <h5 class="mt-2 mb-0">{data.name}</h5>
+                    <span>{data.email}</span>
 
-                <div class="px-4 mt-3">
-                  <p class="fonts">
-                    Hallo nama saya {data.name}, saya berjenis kelamin{" "}
-                    {data.jenis_kelamin}. saya tinggal di {data.alamat} saya
-                    lahir pada tanggal {data.tanggal_lahir}
-                  </p>
-                </div>
+                    <div class="px-4 mt-3">
+                      <p class="fonts">
+                        Hallo nama saya {data.name}, saya berjenis kelamin{" "}
+                        {data.jenis_kelamin}. saya tinggal di {data.alamat} saya
+                        lahir pada tanggal {data.tanggal_lahir}
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 <div class="buttons">
                   <button

@@ -8,9 +8,10 @@ import Home from "./pages/Home";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./component/profile/Profile";
-import Data from "./component/post/Data";
+import Data from "./component/dashboard/Data";
 import Edit from "./component/post/Edit";
 import Tags from "./component/post/Tags";
+import Tag from "./component/dashboard/Tag/Tag";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/create" element={<Create />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route path="/posts/tags/:id" element={<Tags />} />
+          <Route path="/tags" element={<Tag />} />
           <Route path="/posts/data/:id/edit" element={<Edit />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />

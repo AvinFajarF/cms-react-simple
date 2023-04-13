@@ -29,7 +29,7 @@ function App() {
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="/posts">
-              Features
+              Post
                 </a>
               </li>
               <li className="nav-item px-4">
