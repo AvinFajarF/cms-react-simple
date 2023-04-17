@@ -75,7 +75,6 @@ function ForgotPassword() {
                   <div className="form-group mb-2">
                     <input
                       type="text"
-                      onChange={typingToken}
                       className="form-control"
                       id="token"
                       value={tokenParam}
@@ -86,7 +85,6 @@ function ForgotPassword() {
                   <div className="form-group mb-2">
                     <input
                       type="email"
-                      onChange={typingEmail}
                       className="form-control"
                       value={emailParam}
                       hidden
