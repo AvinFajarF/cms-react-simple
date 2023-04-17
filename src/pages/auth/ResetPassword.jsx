@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import {useNavigate } from "react-router-dom";
+import {useLocation, useNavigate, useParams } from "react-router-dom";
 // toastify
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,6 +12,9 @@ function ResetPassword() {
   const token = localStorage.getItem("Authorization");
   const [email, setEmail] = useState("");
   const navigate = useNavigate()
+  const search = useLocation().search;
+  const tokenParam = new URLSearchParams(search).get('token');
+  const emailParam = new URLSearchParams(search).get('email');
 
   const typingEmail = (event) => {
     setEmail(event.target.value);
@@ -66,6 +69,7 @@ function ResetPassword() {
 
       
   };
+  
 
   return (
     <>
@@ -84,6 +88,7 @@ function ResetPassword() {
                       onChange={typingEmail}
                       className="form-control"
                       id="email"
+                      value={emailParam}
                       placeholder="Email"
                     />
                   </div>

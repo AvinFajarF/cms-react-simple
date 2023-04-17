@@ -39,8 +39,18 @@ function Data() {
   //define state
   const [posts, setPosts] = useState([]);
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const onChangeHandler = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
   //useEffect hook
   useEffect(() => {
+    if (!token) {
+      navigate("/");
+    }
+
     //pengecekan apakah user memiliki hak akses ke component ini
     axios.get("http://localhost:8000/sanctum/csrf-cookie").then(async () => {
       await axios
@@ -52,9 +62,9 @@ function Data() {
         .then((res) => {
           const { name, alamat, role, jenis_kelamin } = res.data.data;
 
-          // if (role != "superadmin") {
-          //   navigate("/posts");
-          // }
+          if (role != "superadmin") {
+            navigate("/posts");
+          }
         });
     });
 
@@ -156,10 +166,12 @@ function Data() {
               {
                 title: titleCreate,
                 content: contentCreate,
+                image: selectedFile
               },
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
+                  'Content-Type': 'multipart/form-data'
                 },
               }
             )
@@ -206,69 +218,69 @@ function Data() {
 
   return (
     <>
-              <Container className="mt-3">
-                <ToastContainer />
-                <Row>
-                  <Col md="{12}">
-                    <Card className="border-0 rounded shadow-sm">
-                      <Card.Body>
-                        <Button
-                          className="mb-3 btn-sm"
-                          variant="primary"
-                          onClick={handleShow}
-                        >
-                          Create Post
-                        </Button>
+      <Container className="mt-3">
+        <ToastContainer />
+        <Row>
+          <Col md="{12}">
+            <Card className="border-0 rounded shadow-sm">
+              <Card.Body>
+                <Button
+                  className="mb-3 btn-sm"
+                  variant="primary"
+                  onClick={handleShow}
+                >
+                  Create Post
+                </Button>
 
-                        <Link to={'/tags'}
-                          className="btn btn-primary mb-3 btn-sm ms-2"
-                          variant="primary"
-                        >
-                          Create tag
-                        </Link>
-                       
-                        <Table striped bordered hover className="mb-1">
-                          <thead>
-                            <tr>
-                              <th>NO.</th>
-                              <th>TITLE</th>
-                              <th>CONTENT</th>
-                              <th>VIEWS</th>
-                              <th>AKSI</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {posts.map((post, index) => (
-                              <tr key={post.id}>
-                                <td>{index + 1}</td>
-                                <td>{post.title}</td>
-                                <td>{post.content}</td>
-                                <td>{post.views}</td>
-                                <td className="text-center">
-                                  <button
-                                    onClick={() => handeleDeletePost(post.id)}
-                                    className="btn btn-outline-danger btn-sm"
-                                  >
-                                    Delete
-                                  </button>
+                <Link
+                  to={"/tags"}
+                  className="btn btn-primary mb-3 btn-sm ms-2"
+                  variant="primary"
+                >
+                  Create tag
+                </Link>
 
-                                  <a
-                                    href={`/posts/data/${post.id}/edit`}
-                                    className="btn btn-outline-primary btn-sm ms-2"
-                                  >
-                                    Edit
-                                  </a>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-              </Container>
-            
+                <Table striped bordered hover className="mb-1">
+                  <thead>
+                    <tr>
+                      <th>NO.</th>
+                      <th>TITLE</th>
+                      <th>CONTENT</th>
+                      <th>VIEWS</th>
+                      <th>AKSI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {posts.map((post, index) => (
+                      <tr key={post.id}>
+                        <td>{index + 1}</td>
+                        <td>{post.title}</td>
+                        <td>{post.content}</td>
+                        <td>{post.views}</td>
+                        <td className="text-center">
+                          <button
+                            onClick={() => handeleDeletePost(post.id)}
+                            className="btn btn-outline-danger btn-sm"
+                          >
+                            Delete
+                          </button>
+
+                          <a
+                            href={`/posts/data/${post.id}/edit`}
+                            className="btn btn-outline-primary btn-sm ms-2"
+                          >
+                            Edit
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -297,6 +309,13 @@ function Data() {
               id="content"
               onChange={ContentCreate}
             />
+          </div>
+
+          <div class="mb-3">
+            <label for="formFile" class="form-label">
+             File Gambar
+            </label>
+            <input class="form-control" type="file"  onChange={onChangeHandler} id="formFile" />
           </div>
         </Modal.Body>
         <Modal.Footer>

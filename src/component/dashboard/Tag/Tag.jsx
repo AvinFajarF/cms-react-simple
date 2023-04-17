@@ -10,6 +10,7 @@ import {
   Table,
   Modal,
 } from "react-bootstrap";
+import { useNavigate } from "react-router";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,7 +37,35 @@ function Tag() {
   const [descriptionEdit, setDescriptionEdit] = useState();
   const [id, setId] = useState()
 
+  const navigate = useNavigate();
+
+
   useEffect(() => {
+
+    if(!token){
+      navigate("/");
+    }
+
+    //pengecekan apakah user memiliki hak akses ke component ini
+    axios.get("http://localhost:8000/sanctum/csrf-cookie").then(async () => {
+      await axios
+        .get("http://localhost:8000/api/v1/user/show", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          const { name, alamat, role, jenis_kelamin } = res.data.data;
+
+          if (role != "superadmin") {
+            navigate("/posts");
+          }
+        });
+    });
+
+
+
+
     const getTagAll = async () => {
       await axios
         .get("http://localhost:8000/sanctum/csrf-cookie")
