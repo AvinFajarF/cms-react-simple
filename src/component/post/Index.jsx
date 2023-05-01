@@ -7,14 +7,14 @@ import "./css/Data.css";
 import { Link } from "react-router-dom";
 
 function App() {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/v1/post");
-        setData(response.data.data.data);
+        setData(response.data.data.data.reverse());
 
         setTimeout(() => {
           setLoading(false);
@@ -26,6 +26,7 @@ function App() {
 
     getData();
   }, []);
+
 
   return (
     <>
@@ -61,25 +62,24 @@ function App() {
               ></button>
             </div>
             <div class="carousel-inner">
-              {data
-                .filter((e) => e.is_pinned == 1)
-                .map((post) => {
-                  return (
-                    <>
-                      <div class="carousel-item active">
-                        <img
-                          src={`http://127.0.0.1:8000/images/${[post.image]}`}
-                          class="d-block w-100"
-                          alt="..."
-                        />
-                        <div class="carousel-caption d-none d-md-block ">
-                          <h5 className="text-primary fw-bold">{post.title}</h5>
-                          <p>{post.content}</p>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })}
+             {data
+  .filter((e) => e.is_pinned == 1)
+  .map((post) => {
+    return (
+      <div class="carousel-item active">
+        <img
+          src={`http://127.0.0.1:8000/images/${post.image}`}
+          class="d-block w-100"
+          alt="..."
+        />
+        <div class="carousel-caption d-none d-md-block ">
+          <h5 className="text-primary fw-bold">{post.title}</h5>
+          <p>{post.content}</p>
+        </div>
+      </div>
+    );
+})}
+
             </div>
             <button
               class="carousel-control-prev"
@@ -115,7 +115,7 @@ function App() {
                   <div className="col mt-4" key={post.id}>
                     <div class="card h-100">
                       <img
-                        src={`http://127.0.0.1:8000/images/${[post.image]}`}
+                        src={`http://127.0.0.1:8000/images/${post.image}`}
                         class="card-img-top"
                         height="250px"
                         alt="..."

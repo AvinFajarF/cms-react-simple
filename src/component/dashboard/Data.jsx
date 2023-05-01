@@ -32,6 +32,7 @@ function Data() {
 
   // state
   const [tag, setTag] = useState([]);
+  const [category, setCategory] = useState([]);
 
   // token
   const token = localStorage.getItem("Authorization");
@@ -50,6 +51,22 @@ function Data() {
     if (!token) {
       navigate("/");
     }
+
+    axios
+      .get("http://localhost:8000/sanctum/csrf-cookie")
+      .then(() => {
+        axios
+          .get("http://localhost:8000/api/v1/category", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setCategory(response.data.data);
+            console.log(response.data.data);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     //pengecekan apakah user memiliki hak akses ke component ini
     axios.get("http://localhost:8000/sanctum/csrf-cookie").then(async () => {
@@ -130,10 +147,15 @@ function Data() {
   const [titleCreate, setTitleCreate] = useState();
   const [contentCreate, setContentCreate] = useState();
   const [tagCreate, setTagCreate] = useState();
+  const [categoryId, setCategoryId] = useState(null);
 
   // tag
   const handleTag = (e) => {
     setTagCreate(e.target.value);
+  };
+
+  const Categoryids = (e) => {
+    setCategoryId(e.target.value);
   };
 
   const TitleCreate = (event) => {
@@ -143,6 +165,8 @@ function Data() {
   const ContentCreate = (event) => {
     setContentCreate(event.target.value);
   };
+
+  console.log(categoryId);
 
   const submitCreatePost = async () => {
     if (!token) {
@@ -166,12 +190,13 @@ function Data() {
               {
                 title: titleCreate,
                 content: contentCreate,
-                image: selectedFile
+                image: selectedFile,
+                category_id: categoryId,
               },
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
-                  'Content-Type': 'multipart/form-data'
+                  "Content-Type": "multipart/form-data",
                 },
               }
             )
@@ -311,11 +336,30 @@ function Data() {
             />
           </div>
 
+          <select
+            class="form-select mt-4 mb-3"
+            aria-label="Default select example"
+            onChange={Categoryids}
+          >
+            <option selected hidden>
+              Pilih category
+            </option>
+            {category.map((data) => {
+              console.log(data.id);
+              return <option value={data.id}>{data.name}</option>;
+            })}
+          </select>
+
           <div class="mb-3">
             <label for="formFile" class="form-label">
-             File Gambar
+              File Gambar
             </label>
-            <input class="form-control" type="file"  onChange={onChangeHandler} id="formFile" />
+            <input
+              class="form-control"
+              type="file"
+              onChange={onChangeHandler}
+              id="formFile"
+            />
           </div>
         </Modal.Body>
         <Modal.Footer>

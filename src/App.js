@@ -12,6 +12,9 @@ import Data from "./component/dashboard/Data";
 import Edit from "./component/post/Edit";
 import Tags from "./component/post/Tags";
 import Tag from "./component/dashboard/Tag/Tag";
+import Category from "./component/dashboard/Category/Category";
+import CategoryCreate  from "./component/dashboard/Category/Create";
+import CategoryDetail from "./component/post/CategoryDetail";
 
 function App() {
   return (
@@ -26,7 +29,10 @@ function App() {
           <Route path="/create" element={<Create />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route path="/posts/tags/:id" element={<Tags />} />
+          <Route path="/category/:id/post" element={<CategoryDetail />} />
           <Route path="/tags" element={<Tag />} />
+          <Route path="/category" element={<Category />} />
+          <Route path="/category/create" element={<CategoryCreate />} />
           <Route path="/posts/data/:id/edit" element={<Edit />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />

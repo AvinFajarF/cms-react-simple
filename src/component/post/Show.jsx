@@ -21,6 +21,8 @@ const Post = () => {
   const [content, setContent] = useState();
   const [title, setTitle] = useState();
 
+  const [postId, setPostId] = useState();
+
   const [tag, setTag] = useState([]);
   const [tagAll, setTagAll] = useState([]);
 
@@ -35,6 +37,9 @@ const Post = () => {
   const handleCloseReply = () => setShowReply(false);
   const handleShowReply = () => setShowReply(true);
   const [perentId, setPerentId] = useState();
+
+  const [category, setCategory] = useState([]);
+  const [categoryDetail, setCategoryDetail] = useState([]);
 
   const handleChange = (event) => {
     setCoba(event.target.value);
@@ -84,7 +89,7 @@ const Post = () => {
                 setComments(res.data.data);
               });
 
-              handleChange(" ")
+            handleChange(" ");
           });
       } else {
         // jika tidak ada munculkan pesan flash massage
@@ -186,12 +191,44 @@ const Post = () => {
   // end commentar logic
 
   useEffect(() => {
+    const getCategorys = async () => {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/v1/categorys"
+        );
+        setCategory(response.data.data);
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const getCategory = async () => {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/v1/category"
+        );
+        setCategoryDetail(response.data.data);
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     const getPost = async () => {
       try {
         // mengambil data post
         const { data } = await axios.get(
           `http://127.0.0.1:8000/api/v1/post/show/${id}`
         );
+
+        setPostId(data.data.id);
 
         // set data untuk nilai update
         setTitle(data.data.title);
@@ -238,7 +275,8 @@ const Post = () => {
     getTag();
 
     getUser();
-
+    getCategorys();
+    getCategory();
     getPost();
     getComments();
   }, []);
@@ -388,6 +426,26 @@ const Post = () => {
                     </a>
                   );
                 })}
+                ;
+                {category.map((data) => {
+  const categorys = category.find(
+    (item) => postId === data.post_id
+  );
+  var category_id = categorys?.category_id;
+  return categoryDetail.map(item => {
+    if (item.id === category_id) {
+      console.log(data.id);
+      return (
+        <a key={item.id} href={`/category/${data.id}/post`} className="text-muted ms-3 text-decoration-none">
+          {item.name}
+        </a>
+      );
+    } else {
+      return null;
+    }
+  });
+})}
+
               </p>
             </div>
           </div>
